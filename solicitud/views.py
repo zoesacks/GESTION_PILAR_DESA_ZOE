@@ -5,9 +5,12 @@ from django.contrib.auth.decorators import login_required
 from .models import solped,productoPedido,mesa
 from django.db.models import Sum
 from django.core.paginator import Paginator, Page
+from datetime import datetime
+import datetime
 from django.utils import timezone
+from administracion.gestion_pases import contaduria_required
 
-@login_required(login_url='/solicitudes/')
+@contaduria_required
 def autorizar_solicitudes(request):
     if request.method == 'POST':
         
@@ -27,7 +30,7 @@ def autorizar_solicitudes(request):
     return redirect('solicitudes')  # Redirige nuevamente a la lista de solicitudes
 
 
-@login_required(login_url='/solicitudes/')
+@contaduria_required
 def detalle_solicitud(request):
     
     if request.method == "POST":
@@ -71,7 +74,7 @@ def detalle_solicitud(request):
     return HttpResponse("Error al cargar los detalles de la solicitud")
 
 
-@login_required(login_url='/solicitudes/')
+@contaduria_required
 def solicitudes_list(request):
 
 
@@ -116,11 +119,11 @@ def solicitudes_list(request):
                         solicitud.FECHA_AUTORIZADO = timezone.now() - timezone.timedelta(hours=3)
                         solicitud.save()
 
-                        print(f'Solicitud aprobada. solicitud id:{solicitud.id}')
+                        #print(f'Solicitud aprobada. solicitud id:{solicitud.id}')
 
                     except (ValueError, solped.DoesNotExist) as ex:
                         # Manejar casos donde el ID no sea válido o no se encuentre la solicitud
-                        print(ex)
+                        #print(ex)
                         pass
 
             return redirect('solicitudes')
@@ -130,9 +133,48 @@ def solicitudes_list(request):
 
             context = {'solicitudes': solicitudes}
             return render(request, 'solicitudes_list.html', context)
-
-
+        
     solicitudes = solped.objects.all().order_by('ESTADO','-OBSERVADA',).filter(ESTADO=0)
+        
+    ##FILTROS
+    #Listado de secretarias y ff sin repetidos
+    secretariasListado = solped.objects.all().values_list('SECRETARIA_NOMBRE', flat=True).distinct()
+    fondosFinanciamiento = solped.objects.all().values_list('FUENTE_FINANCIAMIENTO', flat=True).distinct()
+
+    # Obtener los parámetros de los filtros (si están presentes)
+    fecha_desde = request.GET.get('fecha_desde')
+    fecha_hasta = request.GET.get('fecha_hasta')
+    secretarias_seleccionados = request.GET.getlist('secre')
+    ff_seleccionadas = request.GET.getlist('ff')
+    verSolicitudes = request.GET.get('verSolicitudes')
+
+    if verSolicitudes:
+        if verSolicitudes == "autorizadas":
+            solicitudes = solped.objects.all().order_by('ESTADO','-OBSERVADA',).filter(ESTADO=1)
+
+        elif verSolicitudes == "todas":
+            solicitudes = solped.objects.all().order_by('ESTADO','-OBSERVADA',)
+
+        else: 
+            solicitudes = solped.objects.all().order_by('ESTADO','-OBSERVADA',).filter(ESTADO=0)
+
+    # Aplicar los filtros si están presentes
+    if fecha_desde and fecha_hasta:
+        # Convertir las fechas de texto a objetos datetime
+        fecha_desde = datetime.datetime.strptime(fecha_desde, '%Y-%m-%d').date()
+        fecha_hasta = datetime.datetime.strptime(fecha_hasta, '%Y-%m-%d').date()
+        # Filtrar por rango de fechas
+        solicitudes = solicitudes.filter(FECHA__range=(fecha_desde, fecha_hasta))
+
+    if secretarias_seleccionados:
+        #filtar por secretarias seleccionados
+        solicitudes = solicitudes.filter(SECRETARIA_NOMBRE__in = secretarias_seleccionados)
+
+    if ff_seleccionadas:
+        #filtrar por ff
+        solicitudes = solicitudes.filter(FUENTE_FINANCIAMIENTO__in = ff_seleccionadas)
+
+    
     cantidad_solciitudes_pendientes = solicitudes.count()
 
     articulos = productoPedido.objects.all()
@@ -196,12 +238,14 @@ def solicitudes_list(request):
         'nombres_secretarias': nombres_secretarias,
         'totales_secretarias': totales_secretarias,
         'page': page,
+        'secretariasListado': secretariasListado,
+        'fondosFinanciamiento': fondosFinanciamiento,
         }
     
     return render(request, 'solicitudes_list.html', context)
 
 # Create your views here.
-@login_required(login_url='/mesa/')
+@contaduria_required
 def mesa_list(request):
 
     solicitudes = mesa.objects.all().order_by('ESTADO',)

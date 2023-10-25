@@ -95,7 +95,7 @@ class asientosGastos(models.Model):
 
     class Meta:
         verbose_name = 'Asiento de gasto'
-        verbose_name_plural ='Asientos Gastos' 
+        verbose_name_plural ='Asientos de gastos' 
     
     def __str__(self):
         if self.pk:
@@ -125,7 +125,7 @@ class asientosIngresos(models.Model):
 
     class Meta:
         verbose_name = 'Asiento de ingreso'
-        verbose_name_plural ='Asientos Ingresos' 
+        verbose_name_plural ='Asientos de ingresos' 
     
     def __str__(self):
         if self.pk:
@@ -234,6 +234,12 @@ class proyeccionGastos(models.Model):
     MODIFICADO_POR  = models.DecimalField(max_digits=30,decimal_places=2,blank=True,null=True)
     FECHA_MODIFICACION = models.CharField(max_length=120, null=True, blank=True)
 
+        
+    class Meta:
+        verbose_name = 'Proyeccion de gasto'
+        verbose_name_plural ='Proyecciones de gastos' 
+
+
     def __str__(self):
         formatted_importe = '{:,.2f}'.format(self.IMPORTE)
 
@@ -271,6 +277,10 @@ class proyeccionIngresos(models.Model):
     IMPORTE = models.DecimalField(max_digits=30,decimal_places=2,blank=True,null=True)
     MODIFICADO_POR  = models.DecimalField(max_digits=30,decimal_places=2,blank=True,null=True)
     FECHA_MODIFICACION = models.CharField(max_length=120, null=True, blank=True)
+
+    class Meta:
+        verbose_name = 'Proyeccion de ingreso'
+        verbose_name_plural ='Proyecciones de ingresos' 
 
     def __str__(self):
         formatted_importe = '{:,.2f}'.format(self.IMPORTE)

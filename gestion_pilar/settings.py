@@ -11,8 +11,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-=o_x^5jv1tzc-22-&%mu$2h%$6+n!o8tae8&(pyj!6)lkpafs$'
 
 # SECURITY WARNING: don't run with debug turned on in production!
+#DEBUG = True
 DEBUG = True
-#DEBUG = False
 
 ALLOWED_HOSTS = ['127.0.0.1','gestionpilar.online','localhost']
 #ALLOWED_HOSTS = ['gestionpilar.online','localhost']
@@ -25,7 +25,8 @@ CSRF_TRUSTED_ORIGINS = [
 # Application definition
 
 INSTALLED_APPS = [
-    'import_export',  
+      
+    'jazzmin',
     'django.contrib.humanize',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -33,11 +34,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',  
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'import_export',
+    'tesoreria',
     'ingresos',
     'contaduria',
     'administracion',
     'solicitud',
-    'tablas',
+    'servicios_generales',
     'facturas',
 ]
 

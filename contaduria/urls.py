@@ -13,18 +13,3 @@ urlpatterns = [
     path('ingresos/proyeccioningresos/', proyeccioningresos, name='proyeccioningresos'),
     path('redeterminaciones/', aplicaciones_redeterminaciones, name='redeterminaciones'),
 ]
-
-'''
-urlpatterns = [
-    path('aplicaciones/', aplicaciones_contaduria, name='aplicaciones'),
-  
-    path('ingresos/', ingresos_contaduria, name='ingresos'),
-    
-    path('prestamos/', prestamos, name='prestamos'),
-    path('ingresos/asientosingreso/', asientosingreso, name='asientosingreso'),
-    path('ingresos/proyeccioningreso/', proyeccioningresos, name='proyeccioningresos'),
-    path('gastos/asientosgasto/', asientosgasto, name='asientosgasto'),
-    path('gastos/proyecciongasto/', proyecciongasto, name='proyecciongasto'),
-    
-]
-'''

@@ -4,15 +4,12 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.forms import AuthenticationForm
 from ingresos.models import base_contribuyentes,tabla_alicuotas
 from django.core.paginator import Paginator
-from tablas.models import partida
 from django.views.decorators.csrf import csrf_protect
+from servicios_generales.models import *
+from administracion.gestion_pases import ingresos_required,general_required
 
-from django.contrib.auth.decorators import user_passes_test
-
-def permisos(user):
-
-    
-    return user.is_superuser
+def sin_acceso_view(request):
+    return render(request, 'sin_acceso.html', { })
 
 @csrf_protect
 def login_view(request):
@@ -38,7 +35,7 @@ def home(request):
         }
     return render(request, 'home.html', context)
 
-@login_required(login_url='/login/')
+@ingresos_required
 def aplicaciones_ingresos(request):
     user = request.user  # Obtenemos el usuario actual
     groups = user.groups.all()  # Obtenemos los grupos a los que pertenece el usuario
@@ -62,7 +59,7 @@ def aplicaciones_ingresos(request):
 
     return render(request, 'aplicaciones_ingresos.html', context)
 
-@login_required(login_url='/login/')
+@ingresos_required
 def calculadora(request):  
 
     cuentas = base_contribuyentes.objects.all()
@@ -126,7 +123,7 @@ def calculadora(request):
     
     return render(request, 'calculadora.html', context)
 
-@login_required(login_url='/login/')
+@ingresos_required
 def serivicios_generales(request):  
 
     partidas = partida.objects.all()

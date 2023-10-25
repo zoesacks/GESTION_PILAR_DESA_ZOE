@@ -8,6 +8,7 @@
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <!-- Modal para mostrar detalles de la solicitud -->
     <div class="modal fade" id="solicitudModal" tabindex="-1" role="dialog" aria-labelledby="solicitudModalLabel" aria-hidden="true">
@@ -80,36 +81,168 @@
         </div>
     </div>
 
+    <!--FILTROS-->
+    <input type="hidden" name="fecha_desde" value="{{ fecha_desde }}">
+    <input type="hidden" name="fecha_hasta" value="{{ fecha_hasta }}">
+
+    <!-- Ventana emergente (modal) para el formulario avanzado -->
+    <div class="modal fade" id="filtroAvanzadoModal" tabindex="-1" role="dialog" aria-labelledby="filtroAvanzadoModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+            <div class="modal-content">
+                <form method="GET">
+            
+                    <div class="modal-header">
+                        <h5 style="color: #5454E6;" id="solicitudModalLabel">
+                            <img class="logo img" src="{% static 'assets/logo.png' %}" alt="" style="height: 50px;width: 50px;">
+                            &nbsp;&nbsp; Filtros avanzados
+                        </h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+            
+                    <div class="modal-body">
+                        <!-- formulario -->
+            
+                        <div class="row p-3">
+                            <div class="btn-group" data-toggle="buttons">
+                                <div class="col-4 m-1">
+                                    <label class="btn btn-outline-primary active w-100 ">
+                                        <input type="radio" name="verSolicitudes" value="pendientes" id="pendientes" checked
+                                            style="appearance: none; -webkit-appearance: none;"> Ver solicitudes pendientes
+                                    </label>
+                                </div>
+                                <div class="col-4 m-1">
+                                    <label class="btn btn-outline-primary  w-100">
+                                        <input type="radio" name="verSolicitudes" value="autorizadas" id="autorizadas" checked
+                                            style="appearance: none; -webkit-appearance: none;"> Ver solicitudes autorizadas
+                                    </label>
+                                </div>
+                                <div class="col-4 m-1">
+                                    <label class="btn btn-outline-primary  w-100">
+                                        <input type="radio" name="verSolicitudes" value="todas" id="todas" checked
+                                            style="appearance: none; -webkit-appearance: none;"> Ver todas las solicitudes
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+            
+                        <div class="row">
+                            <div class="col-6">
+            
+                                <!--FILTRO FECHA-->
+                                <div class="row">
+                                    <div class="col-6 d-block">
+                                        <!-- Filtro desde -->
+                                        <label for="fecha_desde"><b class="text-primary">Fecha desde:</b></label>
+                                        <input type="date" id="fecha_desde" name="fecha_desde" class="form-control">
+                                    </div>
+            
+                                    <div class="col-6 d-block">
+                                        <!-- Filtro hasta -->
+                                        <label for="fecha_hasta"><b class="text-primary">Fecha hasta:</b></label>
+                                        <input type="date" id="fecha_hasta" name="fecha_hasta" class="form-control">
+                                    </div>
+                                </div>
+            
+            
+                                <!--FILTRO PROVEEDOR-->
+                                <div class="row">
+                                    <div class="col-6">
+                                        <label for="secre" style="margin-top: 20px;">
+                                            <p><b class="text-primary">Secretarias</b></p>
+                                            <small class="text-primary font-italic">(Pres. Ctrl para seleccionar más de uno)</small>
+                                        </label>
+            
+                                        <input type="text" id="buscador_secretarias" class="form-control"
+                                            placeholder="Buscar secretaria...">
+                                    </div>
+                                    <div class="col-6">
+            
+                                        <label for="ff" style="margin-top: 20px;">
+                                            <p><b class="text-primary">Fuente Financiamiento</b></p>
+                                            <small class="text-primary font-italic">(Pres. Ctrl para seleccionar más de uno)</small>
+                                        </label>
+                                        <input type="text" id="buscador_ff" class="form-control" placeholder="Buscar ff...">
+                                    </div>
+                                </div>
+            
+                                <div class="row">
+            
+                                    <div class="col-6">
+                                        <!-- lista de secretarias -->
+                                        <select id="secre" name="secre" class="form-control" multiple style="font-size: small;margin-top: 15px; height: 280px; resize: vertical; max-height: 500px;">
+                                            {% for secre in secretariasListado %}
+                                            <option value="{{ secre }}">{{ secre }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+            
+                                    <div class="col-6">
+            
+                                        <!-- lista de ff -->
+                                        <select id="ff" name="ff" class="form-control" multiple style="font-size: small;margin-top: 15px; height: 280px; resize: vertical; max-height: 500px;">
+                                            {% for ff in fondosFinanciamiento %}
+                                            <option value="{{ ff }}">{{ ff }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+            
+                                </div>
+            
+                            </div>
+                            <div class="col-6">
+                                <div class="row">
+                                    <div class="col-6 ">
+                                        <div class="card" style="border: none;">
+                                            <div class="card-body">
+                                                <p class="card-title"> <b class="text-primary">Secretarias seleccionadas</b> </p>
+                                                <ul id="secretarias_seleccionados" class="list-group"
+                                                    style="list-style: none;font-size: smaller;height: 400px;">
+                                                    <!-- Aquí se listarán los secretarias seleccionados -->
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="card" style="border: none;border-top: 15px;">
+                                            <div class="card-body">
+                                                <p class="card-title"><b class="text-primary">Fondos de financiamiento seleccionados</b> </p>
+                                                <ul id="ff_seleccionadas" class="list-group"
+                                                    style="list-style: none;font-size: smaller;height: 400px;">
+                                                    <!-- Aquí se listarán los códigos seleccionados -->
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+            
+                    </div>
+            
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-danger btn-lg btn-block">Aplicar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div class="container mt-4" style="min-height: 70vh;">
         <div class="card" >
             <div class="card-body" >
 
                 <div class="row">
-                    <!-- cantidad solicitudes totales -->
-                    <div class="col-xl-3 col-md-6 mb-4">
-                        <div class="card shadow h-100 py-2" style="background-color: rgba(1, 37, 242, 0.729);border-left: 4px solid rgba(1, 10, 185, 0.9);">
-                            <div class="card-body">
-                                <div class="row no-gutters align-items-center">
-                                    <div class="col mr-2">
-                                        <div class="text-xl font-weight-bold text-primary text-uppercase mb-1">
-                                            <b style="color: aliceblue;">SOL. TOTALES</b></div>
-                                        <div class="h4 mb-0 font-weight-bold" style="color: #ffffff;">{{ total_solicitudes }}</div>
-                                    </div>
-                                    <div class="col-auto">
-                                        <img class="logo" src="{% static 'assets/iconos/logo-heart.png' %}" alt="" style="height: 60px;">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+
                     <!-- cantidad solicitudes pendientes -->
-                    <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="col-xl-4 col-md-4 mb-4">
                         <div class="card shadow h-100 py-2" style="background-color: rgba(244, 6, 6, 0.2);border-left: 4px solid rgba(253, 0, 0, 0.9);">
                             <div class="card-body">
                                 <div class="row no-gutters align-items-center">
                                     <div class="col mr-2">
                                         <div class="text-xl font-weight-bold text-danger text-uppercase mb-1">
-                                            <b>SOL. PENDIENTES</b></div>
+                                            <b>SOLICITUDES PENDIENTES</b></div>
                                         <div class="h4 mb-0 font-weight-bold text-gray-800" style="color: #f20707;">{{ cantidad_solciitudes_pendientes }}</div>
                                     </div>
                                     <div class="col-auto">
@@ -121,13 +254,13 @@
                     </div>
 
                     <!-- total solicitudes pendientes -->
-                    <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="col-xl-4 col-md-4 mb-4">
                         <div class="card shadow h-100 py-2" style="background-color: rgba(245, 186, 57, 0.5);border-left: 4px solid rgba(237, 146, 0, 0.9);">
                             <div class="card-body">
                                 <div class="row no-gutters align-items-center">
                                     <div class="col mr-2">
                                         <div class="text-lg font-weight-boldtext-uppercase mb-1" style="color: rgb(252, 117, 0);">
-                                            <b>TOT. PENDIENTE</b></div>
+                                            <b>TOTAL PENDIENTE</b></div>
                                         <div class="h4 mb-0 font-weight-bold text-gray-800" style="color: #e96100;">
                                             $ &nbsp;&nbsp; {{ total_pendientes }}
                                         </div>
@@ -141,13 +274,13 @@
                     </div>
 
                     <!-- total solicitudes pendientes -->
-                    <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="col-xl-4 col-md-4 mb-4">
                         <div class="card shadow h-100 py-2" style="background-color: rgba(60, 255, 12, 0.5);border-left: 4px solid rgba(31, 142, 3, 0.5);">
                             <div class="card-body">
                                 <div class="row no-gutters align-items-center">
                                     <div class="col mr-2">
                                         <div class="text-lg font-weight-bold text-uppercase mb-1" style="color: rgb(35, 154, 5);">
-                                            <b>TOT. SELECCIONADO</b>
+                                            <b>TOTAL SELECCIONADO</b>
                                         </div>
                                         <div id="totalSeleccionado" class="h5 mb-0 font-weight-bold text-gray-800" style="color: rgb(35, 154, 5);">
                                             $&nbsp;&nbsp;0
@@ -165,10 +298,10 @@
 
                 
                 <div class="row">
-                    <div class="row p-3 justify-content-start">
+<!--                    <div class="row p-3 justify-content-start">
                         <div class="row">
                             <div class="row">
-                                <form method="post" action="{% url 'solicitudes' %}">
+                               <form method="post" action="{% url 'solicitudes' %}">
                                     {% csrf_token %}
                                     
                                     <input type="hidden" name="ver_solicitudes" id="ver_solicitudes">
@@ -187,7 +320,27 @@
                                 </form>
                             </div>
                         </div>
+                    </div>--> 
+                    <div class="row">
+                        <form id="formImprimir" method="post" action="{% url 'solicitudes' %}">
+                            {% csrf_token %}
+                            <div class="row p-3">
+                                <div class="col-6 d-flex align-items-stretch">
+                                    <input type="hidden" name="solicitudes_seleccionadas" id="solicitudes_seleccionadas">
+                                    <button type="button" class="btn btn-success btn-lg w-100 flex-fill" id="imprimirSeleccionados">
+                                        Autorizar solicitudes seleccionadas
+                                    </button>
+                                </div>
+                        
+                                <div class="col-6 d-flex align-items-stretch">
+                                    <button type="button" class="btn btn-outline-success btn-lg w-100 flex-fill" data-toggle="modal" data-target="#filtroAvanzadoModal">
+                                        Filtros
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
                     </div>
+
                     <div class="row">
                         <div class="col-12">
                             <div class="table-responsive" style="border-radius: 2px;">
@@ -291,6 +444,66 @@
     </div>
 
     <script>
+
+            // Función para configurar los campos de fecha con los valores del primer y último día del mes actual
+        function setDefaultDates() {
+            const fechaDesdeInput = document.getElementById('fecha_desde');
+            const fechaHastaInput = document.getElementById('fecha_hasta');
+
+            fechaDesdeInput.value = getFirstDayOfMonth();
+            fechaHastaInput.value = getLastDayOfMonth();
+        }
+
+        function limitarSecretariasSeleccionados() {
+            const maxSecretariasSeleccionados = 20;
+            const maxCaracteresSecretaria = 22;
+            const secretariasSeleccionados = document.getElementById('secretarias_seleccionados').getElementsByTagName('li');
+
+            for (let i = 0; i < secretariasSeleccionados.length; i++) {
+                let secretariaTexto = secretariasSeleccionados[i].textContent.trim();
+                if (secretariaTexto.length > maxCaracteresSecretaria) {
+                secretariaTexto = secretariaTexto.substring(0, maxCaracteresSecretaria) + '...';
+                }
+                secretariasSeleccionados[i].textContent = '👤 ' + secretariaTexto;
+            }
+
+            if (secretariasSeleccionados.length > maxSecretariasSeleccionados) {
+                for (let i = maxSecretariasSeleccionados; i < secretariasSeleccionados.length; i++) {
+                secretariasSeleccionados[i].style.display = 'none';
+                }
+
+                // Agregar un elemento adicional al final que diga "Mas.."
+                const masElement = document.createElement('li');
+                masElement.textContent = '👉 Mas..';
+                secretariasSeleccionados[maxSecretariasSeleccionados - 1].parentNode.appendChild(masElement);
+            } 
+        }
+
+        function limitarffSeleccionados() {
+            const maxffSeleccionadas = 20;
+            const maxCaracteresff = 22;
+            const ffSeleccionadas = document.getElementById('ff_seleccionadas').getElementsByTagName('li');
+
+            for (let i = 0; i < ffSeleccionadas.length; i++) {
+                let ffTexto = ffSeleccionadas[i].textContent.trim();
+                if (ffTexto.length > maxCaracteresff) {
+                ffTexto = ffTexto.substring(0, maxCaracteresff) + '...';
+                }
+                ffSeleccionadas[i].textContent = '👉 ' + ffTexto;
+            }
+
+            if (ffSeleccionadas.length > maxffSeleccionadas) {
+                for (let i = maxffSeleccionadas; i < ffSeleccionadas.length; i++) {
+                ffSeleccionadas[i].style.display = 'none';
+                }
+
+                // Agregar un elemento adicional al final que diga "Mas.."
+                const masElement = document.createElement('li');
+                masElement.textContent = '👉 Mas..';
+                ffSeleccionadas[maxffSeleccionadas - 1].parentNode.appendChild(masElement);
+            } 
+        }
+
         // Función para obtener las solicitudes seleccionadas
         function obtenerCasillasSeleccionadas() {
             var solicitudesSeleccionadas = [];
@@ -308,7 +521,7 @@
             // Actualizar el valor del campo oculto con las solicitudes seleccionadas
             $('#solicitudes_seleccionadas').val(solicitudesSeleccionadas);
 
-            // autorizar el formulario
+            // Enviar el formulario
             $('#formImprimir').submit();
         });
 
@@ -355,49 +568,135 @@
             // Actualiza el total en la tarjeta verde
             $('#totalSeleccionado').text('$ ' + totalSeleccionado.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,'));
 
-            if (numSolicitudesSeleccionadas > 0) {
-                $('#botonAutorizar').show();
-            } else {
-                $('#botonAutorizar').hide();
-            }
+//            if (numSolicitudesSeleccionadas > 0) {
+//                $('#botonAutorizar').show();
+//            } else {
+//                $('#botonAutorizar').hide();
+//            }
         }
 
         // Llama a la función al cargar la página para verificar el estado inicial
         toggleAutorizarButton();
 
-    $(document).ready(function () {
-        // Manejar clic en el botón de confirmación
-        $('#confirmarAutorizacion').click(function () {
-            var solicitudesSeleccionadas = [];
-            
-            // Recorre todas las casillas de verificación seleccionadas
-            $('input[name="seleccionar"]:checked').each(function () {
-                solicitudesSeleccionadas.push($(this).val());
-            });
-
-            
-            // Envía un formulario con las solicitudes seleccionadas
-            $.post('/autorizar_solicitudes/', { solicitudes: solicitudesSeleccionadas }, function (data) {
-                // Aquí puedes manejar la respuesta del servidor si es necesario
-                
-                window.location.reload();
-            });
-            
-            // Cierra el modal de confirmación
-            $('#confirmarModal').modal('hide');
-        });
     
+        $(document).ready(function () {
+            // Manejar clic en el botón de confirmación
+            $('#confirmarAutorizacion').click(function () {
+                var solicitudesSeleccionadas = [];
+                
+                // Recorre todas las casillas de verificación seleccionadas
+                $('input[name="seleccionar"]:checked').each(function () {
+                    solicitudesSeleccionadas.push($(this).val());
+                });
 
-
-        function obtenerCasillasSeleccionadas() {
-            var solicitudesSeleccionadas = [];
-            $('input[name="seleccionar"]:checked').each(function () {
-                solicitudesSeleccionadas.push($(this).val());
+                
+                // Envía un formulario con las solicitudes seleccionadas
+                $.post('/autorizar_solicitudes/', { solicitudes: solicitudesSeleccionadas }, function (data) {
+                    // Aquí puedes manejar la respuesta del servidor si es necesario
+                    
+                    window.location.reload();
+                });
+                
+                // Cierra el modal de confirmación
+                $('#confirmarModal').modal('hide');
             });
-            return solicitudesSeleccionadas;
-        }
-    });
+    
+            // Función para manejar la selección de todos los elementos
+            $('#seleccionarTodos').click(function () {
+                // Obtén el estado actual de la casilla de verificación "Seleccionar Todos"
+                var isChecked = $(this).prop('checked');
 
+                // Establece el estado de todas las casillas de verificación individuales
+                $('input[name="seleccionar"]').prop('checked', isChecked);
+            });
+
+            function obtenerCasillasSeleccionadas() {
+                var solicitudesSeleccionadas = [];
+                $('input[name="seleccionar"]:checked').each(function () {
+                    solicitudesSeleccionadas.push($(this).val());
+                });
+                return solicitudesSeleccionadas;
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+        limitarSecretariasSeleccionados();
+
+        const buscador = document.getElementById('buscador_secretarias');
+        const selectSecretarias = document.getElementById('secre');
+        const opcionesSecretarias = selectSecretarias.options;
+        const secretariasSeleccionados = document.getElementById('secretarias_seleccionados');
+
+        buscador.addEventListener('input', function () {
+        const filtro = buscador.value.toLowerCase();
+        for (let i = 0; i < opcionesSecretarias.length; i++) {
+            const secre = opcionesSecretarias[i].text.toLowerCase();
+            if (secre.includes(filtro)) {
+                opcionesSecretarias[i].style.display = 'block';
+            } else {
+                opcionesSecretarias[i].style.display = 'none';
+            }
+        }
+        });
+
+        selectSecretarias.addEventListener('change', function () {
+            secretariasSeleccionados.innerHTML = ''; // Limpiamos la lista antes de actualizarla
+
+            for (let i = 0; i < opcionesSecretarias.length; i++) {
+                const opcion = opcionesSecretarias[i];
+                if (opcion.selected) {
+                    const secretariaSeleccionado = document.createElement('li');
+                    secretariaSeleccionado.textContent = opcion.text;
+                    secretariasSeleccionados.appendChild(secretariaSeleccionado);
+                }
+            }
+
+                // Limitar la lista de secretarias seleccionados después de agregar nuevos secretarias
+            limitarSecretariasSeleccionados();
+        });
+
+
+        const buscadorff = document.getElementById('buscador_ff');
+        const selectff = document.getElementById('ff');
+        const opcionesff = selectff.options;
+        const ffSeleccionadas = document.getElementById('ff_seleccionadas');
+
+        buscadorff.addEventListener('input', function () {
+            const filtro2 = buscadorff.value.toLowerCase();
+            for (let i = 0; i < opcionesff.length; i++) {
+                const ff = opcionesff[i].text.toLowerCase();
+                if (ff.includes(filtro2)) {
+                    opcionesff[i].style.display = 'block';
+                } else {
+                    opcionesff[i].style.display = 'none';
+                }
+            }
+        });
+
+
+        selectff.addEventListener('change', function () {
+            ffSeleccionadas.innerHTML = ''; // Limpiamos la lista antes de actualizarla
+            for (let i = 0; i < opcionesff.length; i++) {
+                const opcion2 = opcionesff[i];
+                if (opcion2.selected) {
+                    const ffSeleccionada = document.createElement('li');
+                    ffSeleccionada.textContent = opcion2.text;
+                    ffSeleccionadas.appendChild(ffSeleccionada);
+                }
+            }
+
+                // Limitar la lista de secretarias seleccionados después de agregar nuevos secretarias
+            limitarffSeleccionados();
+        });
+
+
+            // Manejar clic en el botón de filtrar
+        $('#filtroAvanzadoModal').click(function () {
+                // Cierra el modal de confirmación
+            $('#filtroAvanzadoModal').modal('hide');
+            setDefaultDates();
+        });
+    });
 
     // ------------- creacion de grafico GRAFICO_1 --------------
 
@@ -558,7 +857,8 @@
         data: datos_grafico_3,
         options: opciones_grafico_3
     });
-
+    
+ 
     </script>
 
     {% endblock %}
